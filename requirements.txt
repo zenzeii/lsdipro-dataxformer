@@ -1,0 +1,8 @@
+whoosh
+beautifulsoup4
+rapidfuzz
+streamlit
+vertica-python
+pandas
+numpy
+requests
