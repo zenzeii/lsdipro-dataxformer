@@ -38,4 +38,46 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+---
 
+## 🚀 Components Overview
+The architecture of DataXFormer is modular and robust, designed to support example-driven transformation discovery at scale. Below are the core components:
+![alt text](https://raw.githubusercontent.com/zenzeii/lsdipro-dataxformer/refs/heads/main/assets/architecture.png "Architecture")
+![alt text](https://raw.githubusercontent.com/zenzeii/lsdipro-dataxformer/refs/heads/main/assets/technical_aspect.png "Technical Aspects")
+
+### 🔤 Text Normalization
+Standardizes all text inputs before matching:
+- Lowercasing 
+- Removing punctuation/special characters 
+- Stop word removal (e.g., "and", "is")
+- Tokenization (splitting into tokens)
+- Diacritic removal (e.g., “é” → “e”)
+- Stemming (e.g., “running” → “run”)
+- Whitespace normalization
+
+Powered by Whoosh’s StandardAnalyzer, this ensures consistent preprocessing for accurate candidate lookup.
+
+### 🔍 Candidate Lookup
+Searches for relevant tables/columns in a large preprocessed dataset:
+- Utilizes Vertica to store and query the indexed version of the Dresden Web Table Corpus (~120M tables). 
+- Finds matches for example pairs using normalized tokens. 
+- Computes:
+  - Prediction Scores (based on how well the candidate maps examples)
+  - Table Scores (based on overall relevance of table)
+
+### 🔎 Fuzzy Matching
+Identifies close matches when exact matches fail:
+- Uses RapidFuzz and Python’s difflib for approximate string similarity. 
+- Enables robustness against typos and inconsistencies (e.g., “Berlinn” → “Berlin”).
+
+### 📊 Scoring and Ranking
+Applies an Iterative EM (Expectation-Maximization) Algorithm:
+- Alternates between updating table scores and prediction scores until convergence. 
+- Ranks final candidate transformations to provide the best suggestion for user queries.
+
+### 🤖 LLM Validation (Optional)
+A post-processing step that can validate and refine transformation outputs using a local LLM (e.g., via ollama):
+- Filters noisy predictions 
+- Improves semantic accuracy of final result
+
+Can be enabled/disabled in the Streamlit interface.
